@@ -2,7 +2,7 @@ import "./App.css";
 import { useEffect, useMemo, useState, type CSSProperties } from "react";
 import type { Course, Coverage, GradeCounts, Professor } from "./types";
 import { coverageRange, displayName, loadCourses, loadCoverage, loadProfessors, rmpSearchUrl } from "./data";
-import { ABShareRing, CountUp, GradeRows, OverallRings, StackBar, Tile, sumCounts } from "./components/Grades";
+import { ABShareRing, CountUp, GradeRows, StackBar, Tile, sumCounts } from "./components/Grades";
 import SplitText from "./components/SplitText";
 
 type Result =
@@ -61,20 +61,6 @@ function App() {
     return [...courseHits, ...profHits].slice(0, 10);
   }, [query, profs, courses]);
 
-  /** Every section, summed from course entries; pseudo-instructors named "Total" are ignored (display guard). */
-  const allSections = useMemo(() => {
-    const out: GradeCounts = { n: 0 };
-    for (const c of courses) {
-      for (const [pname, g] of Object.entries(c.profs)) {
-        if (pname.trim().toUpperCase() === "TOTAL") continue;
-        for (const k of Object.keys(g) as (keyof GradeCounts)[]) {
-          out[k] = (out[k] ?? 0) + (g[k] ?? 0);
-        }
-      }
-    }
-    return out;
-  }, [courses]);
-
   const range = coverageRange(coverage);
   const semesters = coverage?.semestersIncluded.length ?? 0;
   const searching = query.trim().length >= 2;
@@ -87,7 +73,6 @@ function App() {
       ? Object.entries(selected.prof.courses).sort((a, b) => (b[1].n ?? 0) - (a[1].n ?? 0))
       : Object.entries(selected.course.profs).sort((a, b) => (b[1].n ?? 0) - (a[1].n ?? 0));
     const all = isProf ? sumCounts(selected.prof.courses) : sumCounts(selected.course.profs);
-    const enrollments = isProf ? selected.prof.totalStudents : selected.course.totalStudents;
     const wShare = all.n ? Math.round((100 * (all.w ?? 0)) / all.n) : 0;
     return (
       <div className="wrap detail">
@@ -107,14 +92,7 @@ function App() {
               {dept} - {range}
               {isProf && " - instructor name as printed in SMC official records"}
             </p>
-            <div className="vitals">
-              <ABShareRing counts={all} />
-              <div className="tiles3">
-                <Tile label="Enrollments" hint="all semesters"><CountUp target={enrollments} /></Tile>
-                <Tile label={isProf ? "Courses" : "Instructors"} hint={isProf ? "taught" : "on record"}><CountUp target={groups.length} /></Tile>
-                <Tile label="Withdrew" hint="W, not a grade"><CountUp target={wShare} />%</Tile>
-              </div>
-            </div>
+            <ABShareRing counts={all} withdrewShare={wShare} />
             {isProf && (
               <>
                 <a className="rmp" href={rmpSearchUrl(selected.prof.name)} target="_blank" rel="noreferrer">
@@ -128,7 +106,7 @@ function App() {
             {groups.map(([gname, counts], i) => (
               <section className="card pop" key={gname} style={{ "--i": Math.min(i, 6) } as CSSProperties}>
                 <div className="code">{isProf ? gname : displayName(gname)}</div>
-                <div className="cn">n = {(counts.n ?? 0).toLocaleString()} enrollments, summed across semesters</div>
+                <div className="cn">{(counts.n ?? 0).toLocaleString()} enrollments, summed across semesters</div>
                 <StackBar counts={counts} />
                 <GradeRows counts={counts} />
               </section>
@@ -213,9 +191,6 @@ function App() {
             <Tile label="Courses" hint="on record"><CountUp target={courses.length} /></Tile>
             <Tile label="Semesters" hint={range}><CountUp target={semesters} /></Tile>
           </div>
-          <section className="overall pop" style={{ "--i": 4 } as CSSProperties}>
-            <OverallRings counts={allSections} range={range} />
-          </section>
         </>
       )}
       <Footer coverage={coverage} />
