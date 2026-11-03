@@ -19,6 +19,11 @@ function sumCounts(courses: Record<string, GradeCounts>): GradeCounts {
 }
 
 function App() {
+  const go = (r: Result | null) => {
+    const d = document as Document & { startViewTransition?: (cb: () => void) => void };
+    if (d.startViewTransition) d.startViewTransition(() => setSelected(r));
+    else setSelected(r);
+  };
   const [profs, setProfs] = useState<Professor[]>([]);
   const [courses, setCourses] = useState<Course[]>([]);
   const [coverage, setCoverage] = useState<Coverage | null>(null);
@@ -69,7 +74,7 @@ function App() {
     const courseList = Object.entries(p.courses).sort((a, b) => (b[1].n ?? 0) - (a[1].n ?? 0));
     return (
       <div className="wrap">
-        <button className="back" onClick={() => setSelected(null)}>&lsaquo; Search</button>
+        <button className="back" onClick={() => go(null)}>&lsaquo; Search</button>
         <h2 className="dtitle">{displayName(p.name)}</h2>
         <p className="dmeta">
           {p.dept} - {range} - instructor name as printed in SMC official records
@@ -86,7 +91,7 @@ function App() {
         </a>
         <p className="rmpnote">Opens an external search on ratemyprofessors.com - not a verified profile match.</p>
         {courseList.map(([cname, counts], i) => (
-          <section className="sec" key={cname} style={{ animationDelay: `${i * 90}ms` }}>
+          <section className="sec" key={cname} style={{ animationDelay: `${Math.min(i * 90, 450)}ms` }}>
             <div className="code">{cname}</div>
             <div className="cn">n = {(counts.n ?? 0).toLocaleString()} enrollments, summed across semesters</div>
             <GradeRows counts={counts} />
@@ -103,7 +108,7 @@ function App() {
     const profList = Object.entries(c.profs).sort((a, b) => (b[1].n ?? 0) - (a[1].n ?? 0));
     return (
       <div className="wrap">
-        <button className="back" onClick={() => setSelected(null)}>&lsaquo; Search</button>
+        <button className="back" onClick={() => go(null)}>&lsaquo; Search</button>
         <h2 className="dtitle">{c.course}</h2>
         <p className="dmeta">{c.dept} - {range}</p>
         <div className="vitals">
@@ -114,7 +119,7 @@ function App() {
           </div>
         </div>
         {profList.map(([pname, counts], i) => (
-          <section className="sec" key={pname} style={{ animationDelay: `${i * 90}ms` }}>
+          <section className="sec" key={pname} style={{ animationDelay: `${Math.min(i * 90, 450)}ms` }}>
             <div className="code">{displayName(pname)}</div>
             <div className="cn">n = {(counts.n ?? 0).toLocaleString()} enrollments, summed across semesters</div>
             <GradeRows counts={counts} />
@@ -148,7 +153,7 @@ function App() {
           onKeyDown={(e) => {
             if (e.key === "ArrowDown") { e.preventDefault(); setActiveIndex((i) => Math.min(i + 1, results.length - 1)); }
             else if (e.key === "ArrowUp") { e.preventDefault(); setActiveIndex((i) => Math.max(i - 1, -1)); }
-            else if (e.key === "Enter" && results.length > 0) { e.preventDefault(); setSelected(results[activeIndex >= 0 ? activeIndex : 0]); }
+            else if (e.key === "Enter" && results.length > 0) { e.preventDefault(); go(results[activeIndex >= 0 ? activeIndex : 0]); }
           }}
           placeholder="Try Hamada or ENGL C1000"
         />
@@ -167,8 +172,8 @@ function App() {
           <button
             key={i}
             className={`rrow ${i === activeIndex ? "active" : ""}`}
-            style={{ animationDelay: `${i * 55}ms` }}
-            onClick={() => setSelected(r)}
+            style={{ animationDelay: `${Math.min(i * 55, 330)}ms` }}
+            onClick={() => go(r)}
           >
             {r.kind === "professor" ? (
               <>
