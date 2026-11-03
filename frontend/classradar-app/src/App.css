@@ -73,3 +73,10 @@ h2.dtitle { font-size: 34px; font-weight: 800; letter-spacing: -.03em; line-heig
   *, *::before, *::after { animation-duration: .01ms !important; animation-delay: 0ms !important; transition-duration: .15s !important; transition-delay: 0ms !important; }
 }
 
+::view-transition-old(root) { animation: vt-out .18s cubic-bezier(.28,.68,0,1) both; }
+::view-transition-new(root) { animation: vt-in .32s cubic-bezier(.28,.68,0,1) both; }
+@keyframes vt-out { to { opacity: 0; transform: translateY(6px); } }
+@keyframes vt-in { from { opacity: 0; transform: translateY(14px); } }
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-old(root), ::view-transition-new(root) { animation: none !important; }
+}
