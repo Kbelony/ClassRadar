@@ -1,5 +1,12 @@
 * { margin: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
+body {
+  background: #fbfbfd;
+  color: #1d1d1f;
+  font-family: Inter, system-ui, -apple-system, "Segoe UI", sans-serif;
+  font-feature-settings: "tnum" 1;
+}
+
 .wrap { max-width: 430px; margin: 0 auto; padding: 28px 22px 64px; }
 @media (min-width: 720px) { .wrap { max-width: 560px; } }
 
