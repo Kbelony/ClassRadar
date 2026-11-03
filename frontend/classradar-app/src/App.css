@@ -64,19 +64,6 @@ button{ font-family:var(--font); }
   font-variant-numeric:tabular-nums; }
 .tile .tilehint{ display:block; margin-top:6px; font-size:13px; color:var(--ink2); }
 
-/* ---------- Carte "All sections" verre depoli ---------- */
-.overall{ margin-top:26px; border-radius:var(--r); border:1px solid rgba(255,255,255,.7);
-  background:rgba(255,255,255,.62); -webkit-backdrop-filter:blur(20px) saturate(180%);
-  backdrop-filter:blur(20px) saturate(180%); box-shadow:var(--shadow-card); padding:26px; }
-.orings{ display:flex; align-items:center; gap:28px; flex-wrap:wrap; justify-content:center; }
-.orings svg{ width:220px; height:220px; flex:0 0 auto; }
-.oright{ flex:1 1 220px; max-width:340px; }
-.olegend{ list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:10px; }
-.olegend li{ display:flex; align-items:center; gap:10px; font-size:15px; color:var(--ink); }
-.olegend .sw{ width:10px; height:10px; border-radius:3px; }
-.olegend b{ margin-left:auto; font-weight:700; font-variant-numeric:tabular-nums; }
-.onote{ margin:16px 0 0; font-size:12.5px; line-height:1.5; color:var(--ink2); }
-
 /* ---------- Resultats groupes ---------- */
 .rcard{ margin-top:22px; background:var(--surface); border:1px solid var(--line2);
   border-radius:20px; box-shadow:var(--shadow-card); overflow:hidden; }
@@ -113,8 +100,6 @@ button{ font-family:var(--font); }
 .kicker{ font-size:11px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:var(--ink2); }
 .dtitle{ overflow-wrap:break-word; margin:8px 0 0; font-size:40px; line-height:1.05; font-weight:800; letter-spacing:-0.03em; }
 .dmeta{ margin:10px 0 0; font-size:15px; color:var(--ink2); }
-.vitals{ display:flex; flex-direction:column; gap:16px; margin-top:22px; }
-.tiles3{ display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:14px; }
 .rmp{ display:inline-flex; align-items:center; min-height:44px; margin-top:20px; font-size:15px;
   font-weight:600; color:var(--link); text-decoration:none; }
 .rmp:hover{ text-decoration:underline; }
@@ -126,14 +111,16 @@ button{ font-family:var(--font); }
 .cn{ margin-top:3px; font-size:12.5px; color:var(--ink2); }
 .card .stack{ margin-top:14px; }
 
+.aside .ringcard{ margin-top:22px; }
+.ringw{ font-size:12.5px; color:var(--ink2); text-align:center; }
+
 /* ---------- Lignes A-F + W separe ---------- */
 .bars{ margin-top:14px; display:flex; flex-direction:column; gap:10px; }
 .bl{ display:flex; align-items:center; gap:12px; font-size:14.5px; }
 .bl .L{ width:14px; font-weight:700; }
 .bl .tk{ flex:1; height:10px; border-radius:999px; background:var(--fill); overflow:hidden; }
 .bl .fill{ display:block; height:100%; border-radius:999px; transition:width 1.1s var(--ease-draw); }
-.bl .pc{ width:44px; text-align:right; color:var(--ink2); font-variant-numeric:tabular-nums; }
-.bl .v{ width:64px; text-align:right; color:var(--ink2); font-variant-numeric:tabular-nums; }
+.bl .pc{ width:48px; text-align:right; color:var(--ink2); font-variant-numeric:tabular-nums; }
 .wblock{ margin-top:12px; border-top:1px dotted var(--line); padding-top:12px; }
 .wnote{ margin:6px 0 0; font-size:12.5px; color:var(--ink2); font-style:italic; }
 .excl{ margin:10px 0 0; font-size:12.5px; color:var(--ink2); }
