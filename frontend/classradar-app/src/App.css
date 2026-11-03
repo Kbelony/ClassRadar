@@ -27,14 +27,16 @@ h1.hero .a { color: #0A84FF; }
 .stat span { font-size: 12px; color: #86868b; font-weight: 600; }
 
 .rlist { margin-top: 6px; }
-.rrow { display: flex; align-items: baseline; gap: 8px; width: 100%; padding: 17px 2px; background: none; border: 0; border-bottom: 1px solid #e8e8ed; font: inherit; text-align: left; cursor: pointer; color: #1d1d1f; animation: fu .5s both; transition: opacity .15s; }
-.rrow:active { opacity: .5; }
+.rrow { display: flex; align-items: baseline; gap: 8px; width: 100%; padding: 17px 2px; background: none; border: 0; border-bottom: 1px solid #e8e8ed; font: inherit; text-align: left; cursor: pointer; color: #1d1d1f; animation: fu .5s both; transition: transform .12s cubic-bezier(.28,.68,0,1), background-color .15s; border-radius: 8px; }
+.rrow:active { transform: scale(.97); }
+@media (hover: hover) { .rrow:hover { background: #f5f5f7; } }
+.rrow:focus-visible, .back:focus-visible { outline: 2px solid #0A84FF; outline-offset: 2px; }
 .rrow.active { background: #f5f5f7; }
 .rrow .nm { font-size: 18px; font-weight: 700; letter-spacing: -.02em; }
 .rrow .mt { margin-left: auto; font-size: 13px; color: #86868b; text-align: right; }
 
-.back { background: none; border: 0; color: #0A84FF; font: inherit; font-size: 15px; font-weight: 600; padding: 8px 0; cursor: pointer; }
-.back:active { opacity: .5; }
+.back { background: none; border: 0; color: #0A84FF; font: inherit; font-size: 15px; font-weight: 600; padding: 8px 0; cursor: pointer; transition: transform .12s cubic-bezier(.28,.68,0,1); border-radius: 8px; }
+.back:active { transform: scale(.96); }
 h2.dtitle { font-size: 34px; font-weight: 800; letter-spacing: -.03em; line-height: 1.05; margin: 10px 0 0; }
 .dmeta { color: #6e6e73; font-size: 15px; margin-top: 6px; }
 .rmp { display: inline-block; margin-top: 12px; color: #0A84FF; font-size: 15px; font-weight: 600; text-decoration: none; }
@@ -70,3 +72,4 @@ h2.dtitle { font-size: 34px; font-weight: 800; letter-spacing: -.03em; line-heig
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: .01ms !important; animation-delay: 0ms !important; transition-duration: .15s !important; transition-delay: 0ms !important; }
 }
+
