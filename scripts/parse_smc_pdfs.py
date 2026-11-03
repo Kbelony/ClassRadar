@@ -14,12 +14,37 @@ FILES = {
  'Spring2024GradeDistribution.pdf':'Spring 2024','Fall-2024-Grade-Distribution.pdf':'Fall 2024',
  'Spring2025GradeDistribution.pdf':'Spring 2025','grade-distribution-fall-2025.pdf':'Fall 2025',
 }
-TEXT_COLS = {'department':'dept','dept':'dept','subject':'subject','course':'course','section':'section',
+TEXT_COLS = {'department':'dept','dept':'dept','subject':'subject','course':'course','section':'section','sect':'section',
              'instructor':'instructor','departmentdiscipline':'dept','discipline':'dept'}
 GRADE_SET = {'a','b','c','d','f','p','np','rd','ix','w','ew','ip','sp','total','count'}
-SKIP_PENALTY = 25.0
+SKIP_PENALTY = 10.0
+MAX_DEV = 18.0  # hard cap: a number may only bind to a column within 18px
+
+SPLIT_TOKENS = {
+ 'sectioninstructor': ['section','instructor'],
+ 'coursesection': ['course','section'],
+ 'coursesectioninstructor': ['course','section','instructor'],
+ 'subjectcourse': ['subject','course'],
+ 'sectioninstructora': ['section','instructor','a'],
+}
+def expand_merged(ws):
+    out = []
+    for w in ws:
+        t = w['text'].lower()
+        if t in SPLIT_TOKENS:
+            parts = SPLIT_TOKENS[t]
+            width = w['x1'] - w['x0']; total_chars = sum(len(p) for p in parts)
+            acc = 0
+            for p in parts:
+                c = w['x0'] + width * (acc + len(p)/2) / total_chars
+                out.append({'text': p, 'x0': c - 1, 'x1': c + 1, 'top': w['top']})
+                acc += len(p)
+        else:
+            out.append(w)
+    return out
 
 def detect_header(ws):
+    ws = expand_merged(ws)
     low = [w['text'].lower() for w in ws]
     if 'instructor' in low and ('section' in low or 'course' in low) and any(t in GRADE_SET for t in low):
         cols = []
@@ -93,7 +118,10 @@ def row_from(ws, cols, cur, semester, pno, joined, problems):
             sec_center = col_centers[col_names.index('section')]
         else:
             sec_center = col_centers[instr_i]
-        left = [w['text'] for w in ws if (w['x0']+w['x1'])/2 < sec_center - 5 and not re.fullmatch(r'\d{5,7}', w['text'])]
+        def is_sec_tok(w):
+            cx = (w['x0']+w['x1'])/2
+            return bool(re.fullmatch(r'\d{4,7}', w['text'])) and abs(cx - sec_center) < 40
+        left = [w['text'] for w in ws if (w['x0']+w['x1'])/2 < sec_center - 5 and not is_sec_tok(w)]
         if left:
             num_i = None
             for i in range(len(left)-1, -1, -1):
@@ -124,19 +152,23 @@ def row_from(ws, cols, cur, semester, pno, joined, problems):
         if i == N: return 0.0
         if j == M: return 1e9
         cx, v = nums[i]; gi, gn = gc[j]
-        return min(abs(cx-col_centers[gi]) + dp(i+1, j+1), SKIP_PENALTY + dp(i, j+1))
+        dev = abs(cx-col_centers[gi])
+        match_cost = (dev if dev <= MAX_DEV else 1e9) + dp(i+1, j+1)
+        return min(match_cost, SKIP_PENALTY + dp(i, j+1))
     grades = {n: 0 for _, n in grade_cols}
     i = j = 0
     max_dev = 0.0
     while i < N and j < M:
         gi, gn = gc[j]; cx, v = nums[i]
-        if abs(cx-col_centers[gi]) + dp(i+1, j+1) <= SKIP_PENALTY + dp(i, j+1):
+        dev = abs(cx-col_centers[gi])
+        match_cost = (dev if dev <= MAX_DEV else 1e9) + dp(i+1, j+1)
+        if dev <= MAX_DEV and match_cost <= SKIP_PENALTY + dp(i, j+1):
             grades[gn] = v
-            max_dev = max(max_dev, abs(cx-col_centers[gi]))
+            max_dev = max(max_dev, dev)
             i += 1; j += 1
         else:
             j += 1
-    if max_dev > 15.0:
+    if max_dev > MAX_DEV:
         problems.append((semester, pno, f'column deviation {max_dev:.0f}px', joined))
         return None
     if i < N:
@@ -156,8 +188,16 @@ def parse_pdf(path, semester):
     with pdfplumber.open(path) as pdf:
         for pno, page in enumerate(pdf.pages, 1):
             words = page.extract_words(x_tolerance=2)
+            # cluster words into lines by vertical gap (<=4px same line)
+            words_by_top = sorted(words, key=lambda w: w['top'])
             lines = defaultdict(list)
-            for w in words: lines[round(w['top']/3)].append(w)
+            li_idx = -1; last_top = None
+            for w in words_by_top:
+                if last_top is None or w['top'] - last_top > 4:
+                    li_idx += 1
+                lines[li_idx].append(w)
+                if last_top is None or w['top'] - last_top > 4:
+                    last_top = w['top']
             keys = sorted(lines)
             li = 0
             while li < len(keys):
@@ -165,7 +205,41 @@ def parse_pdf(path, semester):
                 texts = [w['text'] for w in ws]
                 jl = ' '.join(texts).lower()
                 h = detect_header(ws)
-                if h: cols = h; li += 1; continue
+                if h:
+                    # (c) recalibrate: right-aligned numbers sit systematically right of
+                    # centered header letters. Find global shift anchored on the total
+                    # column (always populated, rightmost) minimizing alignment error.
+                    gc_idx = [k for k, (n, c) in enumerate(h) if n in GRADE_SET]
+                    names = [h[k][0] for k in gc_idx]
+                    centers = [h[k][1] for k in gc_idx]
+                    if gc_idx:
+                        lo = min(centers) - 50
+                        xs = sorted((w['x0'] + w['x1']) / 2 for w in words
+                                    if re.fullmatch(r'\d+', w['text']) and (w['x0'] + w['x1']) / 2 >= lo)
+                        clusters = []
+                        for x in xs:
+                            if clusters and x - clusters[-1][-1] <= 9:
+                                clusters[-1].append(x)
+                            else:
+                                clusters.append([x])
+                        means = [sum(c) / len(c) for c in clusters if len(c) >= 2]
+                        if len(means) >= 3:
+                            if 'total' in names:
+                                tc = centers[names.index('total')]
+                                s0 = means[-1] - tc
+                            else:
+                                s0 = max(-40.0, min(45.0, sum(means)/len(means) - sum(centers)/len(centers)))
+                            score0 = sum(min(abs(m - c) for c in centers) for m in means)
+                            best = None
+                            for s_cand in [s0 + d for d in range(-14, 15)]:
+                                if abs(s_cand) > 45: continue
+                                score = sum(min(abs(m - (c + s_cand)) for c in centers) for m in means)
+                                if best is None or score < best[0] or (score == best[0] and abs(s_cand) < abs(best[1])):
+                                    best = (score, s_cand)
+                            if best and abs(best[1]) >= 6 and best[0] < 0.5 * score0:
+                                sh = best[1]
+                                h = [(n, c + sh) if n in GRADE_SET else (n, c) for n, c in h]
+                    cols = h; li += 1; continue
                 if cols is None or 'santa monica college' in jl or 'grade distribution' in jl or 'grand' in jl or jl.startswith('page '):
                     li += 1; continue
                 # merge following lines that are numeric-only within the grade zone (max 3 extra)
@@ -193,14 +267,14 @@ def parse_pdf(path, semester):
                 li = look if extra > 0 else li + 1
     return sections, problems
 
-all_s, all_p = [], []
-for f, sem in FILES.items():
+import sys
+if len(sys.argv) > 1 and sys.argv[1] != 'all':
+    targets = {k: v for k, v in FILES.items() if v == sys.argv[1]}
+else:
+    targets = FILES
+for f, sem in targets.items():
     s, p = parse_pdf(os.path.join('pdfs', f), sem)
-    all_s += s; all_p += p
-    print(f"{sem}: {len(s)} sections, {len(p)} problems")
-print('TOTAL rows:', len(all_s))
-print('instructors:', len(set(s['instructor'] for s in all_s)))
-print('courses:', len(set((s['dept'], s['course']) for s in all_s)))
-print('problems:', len(all_p))
-json.dump(all_s, open('sections.json','w'))
-for p in all_p[:6]: print('PROB:', p[0], p[1], p[2], '|', p[3][:110])
+    safe = sem.replace(' ', '_')
+    json.dump(s, open(f'sections_{safe}.json','w'))
+    json.dump(p, open(f'problems_{safe}.json','w'))
+    print(f"{sem}: {len(s)} sections, {len(p)} problems -> sections_{safe}.json")
