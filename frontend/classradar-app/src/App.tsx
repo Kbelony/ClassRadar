@@ -77,7 +77,7 @@ function App() {
         <div className="vitals">
           <ABShareRing counts={all} />
           <div className="minitiles">
-            <div className="mtile"><b><CountUp target={p.totalStudents} /></b><span>students, all semesters</span></div>
+            <div className="mtile"><b><CountUp target={p.totalStudents} /></b><span>enrollments, all semesters</span></div>
             <div className="mtile"><b><CountUp target={courseList.length} /></b><span>courses</span></div>
           </div>
         </div>
@@ -88,7 +88,7 @@ function App() {
         {courseList.map(([cname, counts], i) => (
           <section className="sec" key={cname} style={{ animationDelay: `${i * 90}ms` }}>
             <div className="code">{cname}</div>
-            <div className="cn">n = {(counts.n ?? 0).toLocaleString()} enrolled, summed across semesters</div>
+            <div className="cn">n = {(counts.n ?? 0).toLocaleString()} enrollments, summed across semesters</div>
             <GradeRows counts={counts} />
           </section>
         ))}
@@ -109,14 +109,14 @@ function App() {
         <div className="vitals">
           <ABShareRing counts={all} />
           <div className="minitiles">
-            <div className="mtile"><b><CountUp target={c.totalStudents} /></b><span>students, all semesters</span></div>
+            <div className="mtile"><b><CountUp target={c.totalStudents} /></b><span>enrollments, all semesters</span></div>
             <div className="mtile"><b><CountUp target={profList.length} /></b><span>instructors</span></div>
           </div>
         </div>
         {profList.map(([pname, counts], i) => (
           <section className="sec" key={pname} style={{ animationDelay: `${i * 90}ms` }}>
             <div className="code">{displayName(pname)}</div>
-            <div className="cn">n = {(counts.n ?? 0).toLocaleString()} enrolled, summed across semesters</div>
+            <div className="cn">n = {(counts.n ?? 0).toLocaleString()} enrollments, summed across semesters</div>
             <GradeRows counts={counts} />
           </section>
         ))}
@@ -130,7 +130,7 @@ function App() {
       <div className="eyebrow">ClassRadar - Santa Monica College</div>
       <h1 className="hero">Grades,<br />out in the <span className="a">open.</span></h1>
       <p className="lede">
-        Every professor. Every course. Official SMC grade distributions, {range.toLowerCase()}, searchable in seconds.
+        Official SMC grade distributions, {range.toLowerCase()}, searchable in seconds.
       </p>
       <div className="sfield">
         <svg width="17" height="17" viewBox="0 0 16 16" fill="none" aria-hidden="true">
@@ -155,7 +155,7 @@ function App() {
       </div>
       {!query && (
         <div className="stats">
-          <div className="stat"><b><CountUp target={profs.length} /></b><span>professors</span></div>
+          <div className="stat"><b><CountUp target={profs.length} /></b><span>instructors</span></div>
           <div className="stat"><b><CountUp target={courses.length} /></b><span>courses</span></div>
           <div className="stat"><b><CountUp target={semesters} /></b><span>semesters</span></div>
         </div>
@@ -173,12 +173,12 @@ function App() {
             {r.kind === "professor" ? (
               <>
                 <span className="nm">{displayName(r.prof.name)}</span>
-                <span className="mt">{r.prof.dept} - {r.prof.totalStudents.toLocaleString()} students</span>
+                <span className="mt">{r.prof.dept} - {r.prof.totalStudents.toLocaleString()} enrollments</span>
               </>
             ) : (
               <>
                 <span className="nm">{r.course.course}</span>
-                <span className="mt">{r.course.dept} - {r.course.totalStudents.toLocaleString()} students</span>
+                <span className="mt">{r.course.dept} - {r.course.totalStudents.toLocaleString()} enrollments</span>
               </>
             )}
           </button>
@@ -196,7 +196,7 @@ function Footer({ coverage }: { coverage: Coverage | null }) {
     <div className="foot">
       Source: <a href="https://admin.smc.edu/administration/institutional-research/grade-distribution.php" target="_blank" rel="noreferrer" style={{ color: "#0A84FF" }}>SMC Office of Institutional Research</a>, "Grade Distribution by Instructor", {range} ({coverage?.semestersIncluded.length ?? "..."} semesters, {(coverage?.rowsIncluded ?? 0).toLocaleString()} sections).
       <br />
-      Shares are computed from counts summed across all semesters (enrollment-weighted), of the printed section total (n). W = withdrawal, not a grade. A-B% is a distribution stat, not a teaching-quality score.
+      Shares are computed from counts summed across all semesters (enrollment-weighted), of the printed section total (n). W = withdrawal, not a grade. Enrollments count section seats, not unique students. A-B% is a distribution stat, not a teaching-quality score.
       <br />
       Instructor names appear exactly as printed in SMC records; same names across departments may be different people.
       {quarantined > 0 && <> {quarantined} section(s) with unreadable attribution were excluded.</>}
