@@ -137,7 +137,6 @@ export function GradeRows({ counts }: { counts: GradeCounts }) {
                 />
               </span>
               <span className="pc">{Math.round(pct)}%</span>
-              <span className="v">{v.toLocaleString()}</span>
             </div>
           );
         })}
@@ -153,7 +152,6 @@ export function GradeRows({ counts }: { counts: GradeCounts }) {
               />
             </span>
             <span className="pc">{Math.round((100 * w) / n)}%</span>
-            <span className="v">{w.toLocaleString()}</span>
           </div>
           <p className="wnote">Withdrew from the course. Not a grade.</p>
         </div>
@@ -164,7 +162,7 @@ export function GradeRows({ counts }: { counts: GradeCounts }) {
 }
 
 /** % of enrollments earning A or B, drawn as a two-segment animated ring. A distribution stat, not a quality score. */
-export function ABShareRing({ counts }: { counts: GradeCounts }) {
+export function ABShareRing({ counts, withdrewShare }: { counts: GradeCounts; withdrewShare?: number }) {
   const n = counts.n ?? 0;
   const a = n > 0 ? countOf(counts, "a") / n : 0;
   const b = n > 0 ? countOf(counts, "b") / n : 0;
@@ -198,50 +196,9 @@ export function ABShareRing({ counts }: { counts: GradeCounts }) {
           <span><i style={{ background: "#28B84C" }} />A {Math.round(a * 100)}%</span>
           <span><i style={{ background: "#0A84FF" }} />B {Math.round(b * 100)}%</span>
       </div>
-    </div>
-  );
-}
-
-/** Concentric A-F rings across every section; legend carries the percentages, no title above it. */
-export function OverallRings({ counts, range }: { counts: GradeCounts; range: string }) {
-  const n = counts.n ?? 0;
-  const drawn = useDrawn();
-  const radii = [60, 49, 38, 27, 16];
-  const grades = GRADE_COLORS.slice(0, 5);
-  return (
-    <div className="orings">
-      <svg width="136" height="136" viewBox="0 0 136 136" role="img" aria-label="Distribution of grades across all sections">
-        {grades.map(([k, , color], i) => {
-          const r = radii[i];
-          const C = 2 * Math.PI * r;
-          const share = n > 0 ? countOf(counts, k) / n : 0;
-          return (
-            <g key={k}>
-              <circle cx="68" cy="68" r={r} fill="none" stroke={color} strokeOpacity="0.16" strokeWidth="8" />
-              <circle
-                cx="68" cy="68" r={r} fill="none" stroke={color} strokeWidth="8" strokeLinecap="round"
-                strokeDasharray={C} strokeDashoffset={drawn ? C * (1 - share) : C}
-                style={{ transition: `stroke-dashoffset 1.1s var(--ease-draw) ${i * 90}ms` }}
-                transform="rotate(-90 68 68)"
-              />
-            </g>
-          );
-        })}
-      </svg>
-      <div className="oright">
-        <ul className="olegend">
-          {grades.map(([k, label, color]) => {
-            const pct = n > 0 ? Math.round((100 * countOf(counts, k)) / n) : 0;
-            return (
-              <li key={k}>
-                <span className="sw" style={{ background: color }} />
-                {label} <b>{pct}%</b>
-              </li>
-            );
-          })}
-        </ul>
-        <p className="onote">Every section, {range}. Shares of the printed total n; W is a withdrawal, not a grade.</p>
-      </div>
+      {withdrewShare !== undefined && withdrewShare > 0 && (
+        <div className="ringw">{withdrewShare}% withdrew (W = withdrawal, not a grade)</div>
+      )}
     </div>
   );
 }
