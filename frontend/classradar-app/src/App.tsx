@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState } from "react";
 import type { Course, Coverage, GradeCounts, Professor } from "./types";
 import { coverageRange, displayName, loadCourses, loadCoverage, loadProfessors, rmpSearchUrl } from "./data";
 import { ABShareRing, CountUp, GradeRows } from "./components/Grades";
+import SplitText from "./components/SplitText";
 
 type Result =
   | { kind: "professor"; prof: Professor }
@@ -133,7 +134,12 @@ function App() {
   return (
     <div className="wrap">
       <div className="eyebrow">ClassRadar - Santa Monica College</div>
-      <h1 className="hero">Grades,<br />out in the <span className="a">open.</span></h1>
+      <h1 className="hero">
+        <SplitText text="Grades," tag="span" splitType="chars" effect="rise" trigger="load" delay={60} duration={0.9} textAlign="left" />
+        <br />
+        <SplitText text={"out in the\u00A0"} tag="span" splitType="chars" effect="rise" trigger="load" delay={45} duration={0.9} textAlign="left" />
+        <span className="a"><SplitText text="open." tag="span" splitType="chars" effect="rise" trigger="load" delay={45} duration={0.9} textAlign="left" /></span>
+      </h1>
       <p className="lede">
         Official SMC grade distributions, {range.toLowerCase()}, searchable in seconds.
       </p>
