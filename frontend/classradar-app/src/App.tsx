@@ -191,7 +191,7 @@ function App() {
 
 function Footer({ coverage }: { coverage: Coverage | null }) {
   const range = coverageRange(coverage);
-  const quarantined = coverage ? Object.values(coverage.rowsQuarantined).reduce((a, b) => a + b, 0) : 0;
+  const excluded = coverage ? Object.entries(coverage.rowsQuarantined).map(([reason, n]) => `${n} ${reason}`) : [];
   return (
     <div className="foot">
       Source: <a href="https://admin.smc.edu/administration/institutional-research/grade-distribution.php" target="_blank" rel="noreferrer" style={{ color: "#0A84FF" }}>SMC Office of Institutional Research</a>, "Grade Distribution by Instructor", {range} ({coverage?.semestersIncluded.length ?? "..."} semesters, {(coverage?.rowsIncluded ?? 0).toLocaleString()} sections).
@@ -199,7 +199,7 @@ function Footer({ coverage }: { coverage: Coverage | null }) {
       Shares are computed from counts summed across all semesters (enrollment-weighted), of the printed section total (n). W = withdrawal, not a grade. Enrollments count section seats, not unique students. A-B% is a distribution stat, not a teaching-quality score.
       <br />
       Instructor names appear exactly as printed in SMC records; same names across departments may be different people.
-      {quarantined > 0 && <> {quarantined} section(s) with unreadable attribution were excluded.</>}
+      {excluded.length > 0 && <> Excluded: {excluded.join("; ")}.</>}
       <br />
       Professor reviews open as an external RateMyProfessors search - not a verified profile match.
     </div>
