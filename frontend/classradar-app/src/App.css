@@ -11,7 +11,8 @@ body {
 @media (min-width: 720px) { .wrap { max-width: 560px; } }
 
 .eyebrow { font-size: 13px; font-weight: 600; color: #86868b; letter-spacing: .02em; animation: fu .8s .05s cubic-bezier(.28,.68,0,1) both; }
-h1.hero { font-size: 44px; font-weight: 800; letter-spacing: -.032em; line-height: 1.03; margin: 10px 0 0; animation: fu .8s .15s cubic-bezier(.28,.68,0,1) both; }
+h1.hero { font-size: 44px; font-weight: 800; letter-spacing: -.032em; line-height: 1.03; margin: 10px 0 0; }
+h1.hero .split-parent { letter-spacing: inherit; }
 h1.hero .a { color: #0A84FF; }
 .lede { font-size: 17px; color: #6e6e73; margin-top: 14px; max-width: 38ch; animation: fu .8s .25s cubic-bezier(.28,.68,0,1) both; }
 @keyframes fu { from { opacity: 0; transform: translateY(22px); } }
