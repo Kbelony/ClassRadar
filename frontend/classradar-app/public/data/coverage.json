@@ -45,8 +45,9 @@
   "Spring 2025": 2328,
   "Fall 2025": 2396
  },
- "rowsIncluded": 50671,
+ "rowsIncluded": 50599,
  "rowsQuarantined": {
+  "grade sum != printed total": 72,
   "unresolved course attribution": 1
  },
  "aggregation": "Counts summed across semesters per professor/course; shares computed from summed counts (enrollment-weighted), never an average of per-section percentages. n = printed section total. A-F and W shares are of n; P/NP/IX/EW/RD/IP/SP excluded from letter bars.",
